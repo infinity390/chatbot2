@@ -1,3 +1,8 @@
+fuck = "fuck"
+antonyms = [("happy", "sad"), ("boy","girl"), ("criminal","innocent"), ("naked", "clothed"), ("virgin", "pregnant"), ("dead","alive")]
+synonyms = [("naked","without-clothes")]
+nnn = "girl boy criminal innocent virgin girl-friend"
+phrase = "get-laid girl-friend without-clothes"
 import itertools
 import copy
 class TreeNode:
@@ -14,12 +19,12 @@ class TreeNode:
         return str_form(self) == str_form(other)
 def tree_form(tabbed_strings):
     lines = tabbed_strings.split("\n")
-    root = TreeNode("Root") # add a dummy node
+    root = TreeNode("Root")
     current_level_nodes = {0: root}
     stack = [root]
     for line in lines:
-        level = line.count(' ') # count the spaces, which is crucial information in a string representation
-        node_name = line.strip() # remove spaces, when putting it in the tree form
+        level = line.count(' ')
+        node_name = line.strip()
         node = TreeNode(node_name)
         while len(stack) > level + 1:
             stack.pop()
@@ -27,28 +32,25 @@ def tree_form(tabbed_strings):
         parent_node.children.append(node)
         current_level_nodes[level] = node
         stack.append(node)
-    return root.children[0] # remove dummy node
+    return root.children[0]
 
-# convert tree into string representation
 def str_form(node):
     def recursive_str(node, depth=0):
-        result = "{}{}".format(' ' * depth, node.name) # spacings
+        result = "{}{}".format(' ' * depth, node.name)
         for child in node.children:
-            result += "\n" + recursive_str(child, depth + 1) # one node in one line
+            result += "\n" + recursive_str(child, depth + 1)
         return result
     return recursive_str(node)
 
 def string_equation(equation_tree):
     if not equation_tree.children:
-        # Leaf nodes
         if equation_tree.name.startswith("v_"):
-            return equation_tree.name[2:].upper()  # v_x → X
+            return equation_tree.name[2:].upper()
         elif equation_tree.name.startswith("d_"):
-            return equation_tree.name[2:]  # d_5 → 5
+            return equation_tree.name[2:]
         else:
             return equation_tree.name
-
-    # Operator mapping for infix style
+        
     op_map = {
         "f_dot": " . ",
         "f_add": " + ",
@@ -57,24 +59,24 @@ def string_equation(equation_tree):
     }
 
     if equation_tree.name in op_map:
-        # Infix operator
+        
         op = op_map[equation_tree.name]
         parts = [string_equation(child) for child in equation_tree.children]
         return "(" + op.join(parts) + ")"
 
     elif equation_tree.name == "f_len":
-        # Length style with bars
+        
         inner = string_equation(equation_tree.children[0])
         return f"|{inner}|"
 
     elif equation_tree.name.startswith("f_"):
-        # Function style
-        func_name = equation_tree.name[2:]  # Remove "f_"
+        
+        func_name = equation_tree.name[2:]
         args = ", ".join(string_equation(child) for child in equation_tree.children)
         return f"{func_name}({args})"
 
     else:
-        # Unknown node style
+        
         args = ", ".join(string_equation(child) for child in equation_tree.children)
         return f"{equation_tree.name}({args})"
 
@@ -131,15 +133,16 @@ def product(string):
         p = p * word(item)
     return p
 
-s = " ".join([item.replace(" ", "-") for item in str(summation("lucy's mary's john's bob's my your her his")*summation("father mother son daughter")).split("\n")])
-actor = summation("you i john bob lucy mary she he "+s)
+s = " ".join([item.replace(" ", "-") for item in str(summation("sruti's lucy's mary's john's bob's my your her his")*summation("father mother girl-friend sister brother son daughter")).split("\n")])
+actor = summation("you i john bob sruti lucy mary she he "+s)
 tragedy = product("car accident")
 todie = summation("die perish")
-adjective = summation("not-dead not-sad dead alive not-alive happy sad not-happy")
-action = summation("die walk run kill")
+adjective = summation("not-dead not-sad dead pregnant virgin not-pregnant not-virgin alive not-alive happy naked sad not-happy without-clothes")
+action = summation("die walk run kill murder "+fuck+" get-laid see")
 gender = summation("girl boy")
-noun = summation("girl boy criminal innocent")
-thing = summation("book watch")
+noun = summation(nnn)
+display = summation("naked")
+thing = summation("book watch girl-friend")
 relation = summation("friend")
 const = {}
 const["noun"] = noun
@@ -149,6 +152,7 @@ const["todie"] = todie
 const["tragedy"] = tragedy
 const["adjective"] = adjective
 const["thing"] = thing
+const["display"] = display
 def compute(eq):
     vn = 0
     def compute2(eq):
@@ -294,7 +298,7 @@ def compute(eq):
                         w3 = ""
                     else:
                         w3 ="_"+d
-                    dic = {"died":["die", "dies", "dying"], "was":["is", "am"], "were":["are"], "ran":["runs", "run", "running"]}
+                    dic = {"saw":["see", "sees"], "died":["die", "dies", "dying"], "was":["is", "am"], "were":["are"], "ran":["runs", "run", "running"]}
                     sel = []
                     for key in dic.keys():
                         sel += dic[key]
@@ -335,7 +339,7 @@ def pro(eq):
     def helper(eq):
         nonlocal female
         nonlocal male
-        if eq.name in ["mary", "lucy"]:
+        if eq.name in ["mary", "sruti", "lucy"]:
             female = eq
         elif eq.name in ["john", "bob"]:
             male = eq
@@ -348,6 +352,12 @@ def pro(eq):
 def matcheq(eq, sentence):
     out = compute(tree_form(eq))
     out2 = str(rmdash(out)).replace("-", " ").split("\n")
+    def put(w):
+        global phrase
+        for item in phrase.split(" "):
+            w = w.replace(item.replace("-", " "), item)
+        return w
+    
     index = None
     out3= None
     
@@ -356,11 +366,12 @@ def matcheq(eq, sentence):
         index = out2.index(sentence)
         
         out3 = str(out).split("\n")[index]
-    
+        out3 = put(out3)
     if index is not None:
         
         dic = {}
         for item in out3.split(" "):
+            
             if "_" not in item:
                 continue
             a, b= item.split("_")
@@ -368,14 +379,17 @@ def matcheq(eq, sentence):
                 dic[int(b)] = a
             else:
                 dic[int(b)] += " "+a
-        
+                
         return dic
     
     return None
 def conv_word(w):
+    global antonyms
     w = w.replace("-", " ")
+    for item in phrase.split(" "):
+        w = w.replace(item.replace("-", " "), item)
     
-    opposite2 = [("happy", "sad"), ("boy","girl"), ("criminal","innocent"), ("dead","alive")]
+    opposite2 =antonyms 
     
     for item in opposite2:
         if w == "not " + item[0]:
@@ -398,8 +412,9 @@ def conv_word(w):
         return tree_form("i")
     if w[-2:] == "'s":
         return tree_form(w[:-2])
+
     
-    if w[-2:] in ["ed", "es"]:
+    if w not in ["naked", "without-clothes"] and w[-2:] in ["ed", "es"]:
         if w[-3] in ["i"]:
             return tree_form(w[:-1])
         return tree_form(w[:-2])
@@ -418,12 +433,64 @@ def alltense(eq):
     return list(set(out))
 def plural(eq):
     return False
+import copy
+
 def sort_logic(eq):
-    if len(eq.children) == 2:
-        if eq.children[1].name in ["livingstate", "emotionalstate"]:
-            return TreeNode(eq.name, eq.children[::-1])
-    return eq
-def print_logic(eq, poss=False):
+    # Base condition: swap if condition is met
+    if eq.name in ["belong","equal"] and len(eq.children) == 2 and \
+       ("state" in eq.children[1].name or eq.children[1].name in ["reason", "gender"] or eq.children[1].name in ["sister", "mother"]):
+        return TreeNode(eq.name, [copy.deepcopy(eq.children[1]), copy.deepcopy(eq.children[0])])
+
+    # Recursive processing of children
+    new_children = [sort_logic(child) for child in eq.children]
+    return TreeNode(eq.name, new_children)
+
+def print_logic(eq, poss=False, want=None, token="want"):
+    global nnn
+    if eq.name == "equal" and eq.children[0].name == "reason":
+        return " ".join([print_logic(eq.children[0].children[0]), "because", print_logic(eq.children[1])])
+    if eq.name == "list":
+        if want is not None:
+            return ". ".join([print_logic(TreeNode("equal", [want.fx(token), x])) for x in eq.children])
+        else:
+            return ". ".join([print_logic(x) for x in eq.children])
+    if eq.children is not None and len(eq.children) != 0 and eq.children[0].name == "want":
+        want = eq.children[0].children[0]
+        r = "want"
+        if eq.children[0].children[0].name in ["i", "you", "they", "we"]:
+            pass
+        else:
+            r= "wants"
+        b = print_logic(eq.children[1], False, want)
+        return " ".join([print_logic(want), r, b])
+
+    if want is not None:
+        if eq.name == "act":
+            if len(eq.children)==2:
+                return " ".join(["to", eq.children[1].name])
+            else:
+                a =print_logic(eq.children[2])
+                if a == "i":
+                    a = "me"
+                if want == eq.children[0]:
+                    return " ".join(["to", eq.children[1].name, a])
+                else:
+                    return " ".join([print_logic(eq.children[0]), "to", eq.children[1].name, a])
+        elif eq.name == "equal":
+            if eq.children[0].name in ["gender"] or "state" in eq.children[0].name:
+                r= "to be"
+                if eq.children[1].name == "criminal":
+                    r = "to be"
+                a = print_logic(eq.children[1])
+                if a == "i":
+                    a = "me"
+                if want == eq.children[0].children[0]:
+                    return " ".join([r, a])
+                else:
+                    b = print_logic(eq.children[0].children[0])
+                    if b == "i":
+                        b = "me"
+                    return " ".join([b,r, a])
     if eq.name == "exchange" and eq.children[0].name == "poss":
         a = print_logic(eq.children[0].children[0])
         r = "take"
@@ -432,7 +499,7 @@ def print_logic(eq, poss=False):
         else:
             r = "takes"
         return " ".join([a, r, "the", eq.children[1].name])
-    if eq.name == "put" and eq.children[0].name == "action":
+    if eq.name == "put" and eq.children[0].name == "act":
         a = print_logic(eq.children[0].children[0])
         w = eq.children[1].name
         if a in ["i", "you", "they", "we"]:
@@ -440,7 +507,7 @@ def print_logic(eq, poss=False):
         else:
             w += "s"
         return " ".join([a, w])
-    if eq.name == "put" and eq.children[0].name == "poss":
+    if eq.name in ["equal", "put"] and eq.children[0].name == "poss":
         a = print_logic(eq.children[0].children[0])
         r = "have"
         if a in ["i", "you", "they", "we"]:
@@ -455,14 +522,26 @@ def print_logic(eq, poss=False):
             pass
         else:
             r += "s"
-        return " ".join([a, r, "to", eq.children[1].name])
+        b = print_logic(eq.children[0].children[0], False, eq.children[1])
+        
+        return " ".join([a, r, "to", b])
     if eq.name == "act":
         a = print_logic(eq.children[0])
         b = print_logic(eq.children[1])+"ed"
-        c = print_logic(eq.children[2])
-        if c == "i":
-            c = "me"
-        return " ".join([a, b, c])
+        dic = {"get-laided":"got-laid", "runed":"ran", "dieed":"died", "seeed":"saw"}
+        if b in dic.keys():
+            b = dic[b]
+        else:
+            pass
+        if len(eq.children) > 2:
+            c = print_logic(eq.children[2])
+            if c == "i":
+                c = "me"
+            return " ".join([a, b, c])
+        else:
+            return " ".join([a, b])
+    if eq.name in ["gender"]:
+        return " ".join([print_logic(eq.children[0])])
     if eq.name in ["equal"]:
         a = print_logic(eq.children[0])
         aux = "are" if plural(eq.children[0]) else "is"
@@ -476,7 +555,7 @@ def print_logic(eq, poss=False):
         return " ".join([a, aux, b])
     if eq.name == "not":
         return " ".join(["not", print_logic(eq.children[0])])
-
+    
     
     if eq.children is None or len(eq.children) == 0:
         if poss:
@@ -485,12 +564,17 @@ def print_logic(eq, poss=False):
                 
                 return dic[eq.name]
             return eq.name + "'s"
+        if eq.name in nnn.split(" "):
+            return " ".join(["a", eq.name])
         return eq.name
     
-    if eq.name in ["livingstate", "emotionalstate"]:
+    if "state" in eq.name:
         return print_logic(eq.children[0])
-    if eq.name in ["daughter", "mother", "father", "son"]:
+    if eq.name in ["daughter", "mother", "father", "son", "girl-friend", "sister", "brother"]:
         return " ".join([print_logic(eq.children[0], poss=True), eq.name])
+    
+    
+    return eq.name
 def simplify(eq):
     if (eq.name in ["mother", "father"] and eq.children and eq.children[0].name in ["son", "daughter"]):
         return simplify(eq.children[0].children[0])
@@ -505,54 +589,77 @@ def simplify2(eq):
         if str_form(eq) == orig:
             return eq
 def simplify3(eq):
-    if eq.name == "alive":
-        return tree_form("dead")
-    if eq.name == "dead":
-        return tree_form("alive")
-    if eq.name == "happy":
-        return tree_form("sad")
-    if eq.name == "sad":
-        return tree_form("happy")
-    if eq.name == "girl":
-        return tree_form("boy")
-    if eq.name == "boy":
-        return tree_form("girl")
-    if eq.name == "criminal":
-        return tree_form("innocent")
-    if eq.name == "innocent":
-        return tree_form("criminal")
+    global antonyms
+    global synonyms
+    for item in antonyms:
+        
+        for i in range(2):
+            show = [item[i]]
+            for item2 in synonyms:
+                if item[i] in item2:
+                    show += list(item2)
+                    break
+            if eq.name in show:
+                return tree_form(item[1-i])
     return TreeNode(eq.name, [simplify3(child) for child in eq.children])
+
+
 def simplify4(eq):
     if eq.name == "gender" and eq.children[0].name in ["father", "son", "john", "bob"]:
         return tree_form("boy")
-    if eq.name == "gender" and eq.children[0].name in ["daughter", "mother", "lucy"]:
+    if eq.name == "gender" and eq.children[0].name in ["daughter", "mother", "girl-friend", "sister", "sruti", "lucy"]:
         return tree_form("girl")
     return TreeNode(eq.name, [simplify4(child) for child in eq.children])
 def add_gender(actor):
     if actor.name in ["father", "son", "john", "bob"]:
-        return [TreeNode("equal", [tree_form("boy"), actor.fx("gender")])]
-    if actor.name in ["mother", "daughter", "mary", "lucy"]:
-        return [TreeNode("equal", [tree_form("girl"), actor.fx("gender")])]
+        return [TreeNode("equal", [actor.fx("gender"), tree_form("boy")])]
+    if actor.name in ["sister", "mother", "daughter", "mary", "sruti", "lucy", "girl-friend"]:
+        return [TreeNode("equal", [actor.fx("gender"), tree_form("girl")])]
     return []
 class Logic:
     def __init__(self, code, depth=0):
         self.depth = depth
         self.code = copy.deepcopy(code)
         other = []
+        self.code = list(set(self.code))
+        for i in range(len(self.code)-1,-1,-1):
+            if self.code[i].name == "because":
+                other +=self.code[i].children
+                self.code.pop(i)
+        self.code = list(set(self.code+other))
         def find_gender(eq):
             out = add_gender(eq)
             for child in eq.children:
                 out += find_gender(child)
             return out
+        def act2(eq):
+            out = []
+            item = eq
+            if item.name == "act" and len(item.children)==3:
+                dic2 = {"kill":"dead", "murder":"dead"}
+                if item.children[1].name in dic2.keys():
+                    out += [TreeNode("equal", [item.children[2].fx("livingstate"), tree_form(dic2[item.children[1].name])])]
+                    out += [TreeNode("equal", [item.children[0].fx("guiltystate"), tree_form("criminal")])]
+                    return out
+                dic2 = {fuck:"pregnant"}
+                if item.children[1].name in dic2.keys():
+                    out += [TreeNode("equal", [item.children[0].fx("emotionalstate"), tree_form("satisfied")])]
+                    out += [TreeNode("act", [item.children[0], tree_form("get-laid")])]
+                    out += [TreeNode("equal", [item.children[2].fx("birthstate"), tree_form(dic2[item.children[1].name])])]
+                    return out
+            if item.name == "act" and len(item.children)==3:
+                dic2 = {"die":"dead"}
+                if item.children[1].name in dic2.keys():
+                    out += [TreeNode("equal", [item.children[0].fx("livingstate"), tree_form(dic2[item.children[1].name])])]
+                    return out
+            for i in range(len(eq.children)):
+                out2 = act2(eq.children[i])
+                for item in out2:
+                    out += [TreeNode(eq.name, eq.children[:i]+[item]+eq.children[i+1:])]
+            return out
         for item in self.code:
             other += find_gender(item)
-            if item.name == "act":
-                
-                dic2 = {"kill":"dead"}
-                if item.children[1].name in dic2.keys():
-                    
-                    other += [TreeNode("equal", [item.children[2].fx("livingstate"), tree_form(dic2[item.children[1].name])])]
-                    other += [TreeNode("equal", [item.children[0].fx("guiltystate"), tree_form("criminal")])]
+            other += list(set(act2(item)))
         self.code += list(set(other))
         self.cat = []
         hist = []
@@ -576,7 +683,7 @@ class Logic:
                 self.code.pop(i)
                 
         for key in dic.keys():
-            self.code.append(TreeNode("equal", [tree_form(key), TreeNode("list", list(sorted(dic[key], key=lambda x: str_form(x))))]))
+            self.code.append(TreeNode("equal", [tree_form(key), TreeNode("list", list(sorted(list(set(dic[key])), key=lambda x: str_form(x))))]))
         
 
         
@@ -589,6 +696,33 @@ class Logic:
         self.merge()
         self.merge3()
         self.cat = [list(set([str_form(simplify2(tree_form(y))) for y in x])) for x in self.cat]
+        for i in range(len(self.cat)-1,-1,-1):
+            lst = []
+            for j in range(len(self.cat[i])-1,-1,-1):
+                if tree_form(self.cat[i][j]).name == "list":
+                    lst += tree_form(self.cat[i][j]).children
+                    self.cat[i].pop(j)
+            lst = list(sorted(list(set(lst)), key=lambda x: str_form(x)))
+            if lst != []:
+                self.cat[i].append(str_form(TreeNode("list", lst)))
+        for i in range(len(self.cat)-1,-1,-1):
+            for j in range(len(self.cat[i])-1,-1,-1):
+                item = tree_form(self.cat[i][j])
+                if item.name == "equal" and item.children[0].name == item.children[1].name:
+                    self.cat[i].pop(j)
+                    item = None
+                elif item.name == "reason":
+                    item = copy.deepcopy(item.children[0])
+                    if item.name == "equal" and item.children[0].name == item.children[1].name:
+                        self.cat[i].pop(j)
+                        item = None
+                if item is not None:
+                    self.cat[i][j] = str_form(sort_logic(tree_form(self.cat[i][j])))
+            if self.cat[i] == []:
+                self.cat.pop(i)
+        
+        self.cat = [list(set(x)) for x in self.cat]
+        
         self.code, self.cat = self.fix_contradict()
         
     def __repr__(self):
@@ -611,7 +745,8 @@ class Logic:
                 return logic.code, logic.cat
             orig.insert(i, self.code[i])
     def is_contradict(self):
-        lst = [("happy","sad"),("dead","alive"),("boy","girl"),("criminal","innocent")]
+        global antonyms 
+        lst = antonyms 
         for item in self.cat:
             if any(x[0] in item and x[1] in item for x in lst):
                 return False
@@ -669,6 +804,8 @@ class Logic:
             if data.name != matcher.name:
                 return False
             if tree_form("+") in matcher.children and set([child for child in matcher.children if child != tree_form("+")])<=set(data.children):
+                
+                helper = str_form(data)
                 return True
             
             if len(matcher.children) != len(data.children):
@@ -685,8 +822,11 @@ class Logic:
                 for item in self.cat[i]:
                     
                     if match2(question.children[0], tree_form(item)):
-                        
-                        out2.append(helper)
+                        helper = tree_form(helper)
+                        if question.children[0].name != "want" and helper.name == "list":
+                            out2+= helper.children
+                        else:
+                            out2.append(helper)
             elif typeq == "?":
                 if question.children[0].name == "belong" and\
                    str_form(simplify4(question.children[0].children[0])) in self.cat[i] and\
@@ -700,10 +840,15 @@ class Logic:
                                     any(match2(question.children[0], tree_form(child)) for child in self.cat[i])):
                 out = []
                 for item in self.cat[i]:
-                    out.append(item)
+                    item = tree_form(item)
+                    if question.children[0].name != "want" and item.name == "list":
+                        out+= item.children
+                    else:
+                        out.append(item)
                 return out
         if typeq == "?":
             return None
+        
         return out2
 def fliplogic(eq):
     if eq.name == "you":
@@ -715,32 +860,49 @@ def jointree(eq, eq2):
     if eq.children is None or len(eq.children)==0:
         return TreeNode(eq.name, [eq2])
     return TreeNode(eq.name, [jointree(child, eq2) for child in eq.children])
+def ss(w):
+    global synonyms
+    for item in synonyms:
+        if w in item:
+            return list(item)
+    return []
 def wrap(adjective, actor):
     if adjective.name in ["criminal", "innocent"]:
         return actor.fx("guiltystate")
+    if adjective.name in ["virgin", "pregnant"]:
+        return actor.fx("birthstate")
+    if adjective.name in ["naked", "clothed"]+ss("naked")+ss("clothed"):
+        return actor.fx("clothstate")
     if adjective.name in ["girl", "boy"]:
         return actor.fx("gender")
     if adjective.name in ["happy", "sad"]:
         return actor.fx("emotionalstate")
     elif adjective.name in ["dead", "alive"]:
         return actor.fx("livingstate")
-eq = """f_mul
- f_dot
-  f_repeat
-   f_len
-    v_action
-   v_actor
-  f_past
-   f_verb
-    f_mul
-     v_actor
-     v_action"""
-'''
-eq = tree_form(eq)
-print(eq)
-print(rmdash(compute(eq)))
-'''
 def convert2logic(sentence):
+    
+    if "because" in sentence.split(" "):
+        sentence= sentence.split(" ")
+        w = sentence.index("because")
+        a= convert2logic(" ".join(sentence[:w]))
+        b = convert2logic(" ".join(sentence[w+1:]))
+        return a+b+[TreeNode("equal", [a[0].fx("reason"), b[0]])]
+        
+    f = """f_mul
+ d_what
+ f_dot
+  f_verb
+   f_mul
+    v_actor
+    d_do
+  v_actor
+ d_have"""
+    for eq in alltense(f):
+        
+        eq = str_form(eq)
+        dic = matcheq(eq, sentence)
+        if dic is not None:
+            return [conv_word(dic[1]).fx("poss").fx("?*")]
     f = """f_mul
  d_who
  f_add
@@ -806,7 +968,6 @@ def convert2logic(sentence):
   f_verb
    f_mul
     d_he
-    v_action
  f_obj
   v_actor"""
     for eq in alltense(f):
@@ -855,7 +1016,8 @@ def convert2logic(sentence):
         eq = str_form(eq)
         dic = matcheq(eq, sentence)
         if dic is not None:
-            return [TreeNode("belong", [conv_word(dic[2]), wrap(conv_word(dic[2]), conv_word(dic[1]))]).fx("?")]
+            
+            return [TreeNode("belong", [wrap(conv_word(dic[2]), conv_word(dic[1])), conv_word(dic[2])]).fx("?")]
     f = """f_mul
  f_dot
   v_actor
@@ -869,7 +1031,6 @@ def convert2logic(sentence):
         dic = matcheq(eq, sentence)
         
         if dic is not None:
-            
             return [TreeNode("equal", [conv_word(dic[2]), conv_word(dic[0])])]+ add_gender(conv_word(dic[0]))+ add_gender(conv_word(dic[2]))
     f = """f_mul
  d_who
@@ -910,13 +1071,19 @@ def convert2logic(sentence):
  f_past
   v_action
  f_obj
-  v_actor"""
+  v_actor
+ f_add
+  d_#
+  v_display"""
     
     for eq in alltense(f):
         eq = str_form(eq)
         dic = matcheq(eq, sentence)
         if dic is not None:
-            return [TreeNode("act", [conv_word(dic[0]), conv_word(dic[1]), conv_word(dic[2])])]
+            a = []
+            if 3 in dic.keys():
+                a = [TreeNode("equal", [conv_word(dic[2]).fx("clothstate"), conv_word(dic[3])])]
+            return [TreeNode("act", [conv_word(dic[0]), conv_word(dic[1]), conv_word(dic[2])])]+a
     f = """f_mul
  f_dot
   f_repeat
@@ -933,7 +1100,8 @@ def convert2logic(sentence):
         eq = str_form(eq)
         dic = matcheq(eq, sentence)
         if dic is not None:
-            return [TreeNode("put", [conv_word(dic[1]).fx("action"), conv_word(dic[3])])]
+            return [TreeNode("act", [conv_word(dic[1]), conv_word(dic[3])])]
+
     f = """f_mul
  d_who
  d_is
@@ -948,71 +1116,164 @@ def convert2logic(sentence):
         if dic is not None:
             
             return [conv_word(dic[1]).fx("?*")]
+    f = """f_mul
+ f_dot
+  v_actor
+  f_verb
+   f_mul
+    v_actor
+    d_want
+ d_to
+ v_action
+ f_obj
+  v_actor"""
+    for eq in alltense(f):
+        eq = str_form(eq)
+        dic = matcheq(eq, sentence)
+        if dic is not None:
+            return [TreeNode("put", [conv_word(dic[0]).fx("want"), TreeNode("act", [conv_word(dic[0]), conv_word(dic[2]), conv_word(dic[3])])])]
+    f = """f_mul
+ d_what
+ f_dot
+  f_verb
+   f_mul
+    v_actor
+    d_do
+  v_actor
+ d_want"""
+    for eq in alltense(f):
+        eq = str_form(eq)
+        dic = matcheq(eq, sentence)
+        if dic is not None:
+            return [conv_word(dic[1]).fx("want").fx("?*")]
+    f = """f_mul
+ d_what
+ f_dot
+  f_aux
+   v_actor
+  v_actor
+ d_doing"""
+    for eq in alltense(f):
+        eq = str_form(eq)
+        dic = matcheq(eq, sentence)
+        if dic is not None:
+            
+            return [TreeNode("act", [conv_word(dic[1]), tree_form("+")]).fx("?x")]
+    f = """f_mul
+ d_how
+ f_dot
+  f_aux
+   v_actor
+  v_actor
+ d_feeling"""
+    for eq in alltense(f):
+        eq = str_form(eq)
+        dic = matcheq(eq, sentence)
+        if dic is not None:
+            
+            return [conv_word(dic[1]).fx("emotionalstate").fx("?*")]
+    f = """f_mul
+ d_why
+ f_dot
+  f_aux
+   v_actor
+  v_actor
+ v_adjective"""
+    for eq in alltense(f):
+        eq = str_form(eq)
+        dic = matcheq(eq, sentence)
+        if dic is not None:
+            
+            return [TreeNode("equal", [wrap(conv_word(dic[2]), conv_word(dic[1])), conv_word(dic[2])]).fx("reason").fx("?*")]
+def replace(equation, find, r):
+  if str_form(equation) == str_form(find):
+    return r
+  col = TreeNode(equation.name, [])
+  for child in equation.children:
+    col.children.append(replace(child, find, r))
+  return col
+code = [TreeNode("equal", [tree_form(item) for item in list(x) ]) for x in synonyms]
 
-code = []
+
 while True:
     s = input("chat = ")
-    if s=="logic":
-        s = Logic(code)
-        code = s.code
-        print(s)
-        continue
-    l = convert2logic(s)
-    
-    ques = False
-    for item in l:
-        if item.name not in ["?", "?x", "?*"]:
-            code.append(pro(fliplogic(item)))
-        else:
-            l = item
-            ques = True
-            break
-    if ques:
-        if l.name == "?":
-            
-            logic = Logic(code)
-            code = logic.code
-            l = fliplogic(copy.deepcopy(l))
-            
-            l2 = TreeNode("belong", [simplify3(l.children[0].children[0]), l.children[0].children[1]]).fx("?")
-
-            if logic.query(l) == True:
-                print("yes")
-            elif logic.query(l2) == True:
-                print("no")
+    orig = copy.deepcopy(code)
+    try:
+        if s=="logic":
+            s = Logic(code)
+            code = s.code
+            print(s)
+            continue
+        l = convert2logic(s)
+        
+        ques = False
+        for item in l:
+            if item.name not in ["?", "?x", "?*"]:
+                code.append(pro(fliplogic(item)))
             else:
-                print("i don't know")
-        else:
-            
-            logic = Logic(code)
-            code = logic.code
-            l = fliplogic(l)
-            noout = True
-            for item in logic.query(l):
+                l = item
+                ques = True
+                break
+        if ques:
+            if l.name == "?":
+                ex =[]
+                l = sort_logic(l)
+                if l.children[0].name in ["equal", "belong"] and l.children[0].children[0].name == "gender":
+                    ex += add_gender(l.children[0].children[0].children[0])
+                logic = Logic(code+ex)
+                code = logic.code
+                l = fliplogic(copy.deepcopy(l))
+                l2 = TreeNode("belong", [l.children[0].children[0], simplify3(l.children[0].children[1])]).fx("?")
+                if logic.query(l) == True:
+                    print("yes")
+                elif logic.query(l2) == True:
+                    print("no")
+                else:
+                    print("i don't know")
+            else:
                 
-                item = tree_form(item)
+                logic = Logic(code)
+                code = logic.code
                 
-                if (item.children is None or len(item.children)==0) and item.name in str(noun).split("\n"):
-                    continue
-                if item.name in ["list"]:
-                    continue
-
-                if not (item.children is None or len(item.children)==0) and\
-                   (item.name in ["gender"] or "state" in item.name):
+                l = fliplogic(l)
+                noout = True
+                iswant = None
+                if l.children[0].name  in ["want"]:
+                    iswant = l.children[0].children[0]
+                    token = l.children[0].name
+                
+                for item in logic.query(l):
+                    if isinstance(item, str):
+                        item = tree_form(item)
+                        
+                    if item.name in["want", "poss", "reason"]:
+                        continue
                     
-                    item= item.children[0]
-                
+                    if iswant is None:
+                        if l.children[0].name in ["act"]:
+                            pass
+                        elif l.name == "?x":
+                            item = replace(l.children[0], tree_form("*"), item)
+                        else:
+                            if l.children[0] == item:
+                                continue
+                            item = TreeNode("equal", [l.children[0], item])
+                    item = sort_logic(item)
+                    item = print_logic(item, False, iswant)
+                    
+                    noout =False
+                    print(item)
+                if noout:
+                    print("i don't know")
+        else:
+            for item in l:
+                #l = l[0]
+                item = pro(item)
+                item = fliplogic(item)
                 item = sort_logic(item)
                 item = print_logic(item)
-                noout =False
                 print(item)
-            if noout:
-                print("i don't know")
-    else:
-        l = l[0]
-        item = pro(l)
-        item = fliplogic(item)
-        item = sort_logic(item)
-        item = print_logic(item)
-        print(item)
-    print()
+        print()
+    except:
+        code = copy.deepcopy(orig)
+        print("invalid english\n")
