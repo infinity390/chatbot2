@@ -1,5 +1,8 @@
 fuck = "fuck"
-antonyms = [("happy", "sad"), ("boy","girl"), ("criminal","innocent"), ("naked", "clothed"), ("virgin", "pregnant"), ("dead","alive")]
+pregnant = "pregnant"
+mary = "mary"
+john = "john"
+antonyms = [("happy", "sad"), ("boy","girl"), ("criminal","innocent"), ("naked", "clothed"), ("virgin", pregnant), ("dead","alive")]
 synonyms = [("naked","without-clothes")]
 nnn = "girl boy criminal innocent virgin girl-friend"
 phrase = "get-laid girl-friend without-clothes"
@@ -133,11 +136,11 @@ def product(string):
         p = p * word(item)
     return p
 
-s = " ".join([item.replace(" ", "-") for item in str(summation("sruti's lucy's mary's john's bob's my your her his")*summation("father mother girl-friend sister brother son daughter")).split("\n")])
-actor = summation("you i john bob sruti lucy mary she he "+s)
+s = " ".join([item.replace(" ", "-") for item in str(summation(f"sruti's lucy's {mary}'s {john}'s bob's my your her his")*summation("father mother girl-friend sister brother son daughter")).split("\n")])
+actor = summation(f"you i {john} bob sruti lucy {mary} she he "+s)
 tragedy = product("car accident")
 todie = summation("die perish")
-adjective = summation("not-dead not-sad dead pregnant virgin not-pregnant not-virgin alive not-alive happy naked sad not-happy without-clothes")
+adjective = summation("not-dead not-sad dead "+pregnant+" virgin not-"+pregnant+" not-virgin alive not-alive happy naked sad not-happy without-clothes")
 action = summation("die walk run kill murder "+fuck+" get-laid see")
 gender = summation("girl boy")
 noun = summation(nnn)
@@ -298,7 +301,7 @@ def compute(eq):
                         w3 = ""
                     else:
                         w3 ="_"+d
-                    dic = {"saw":["see", "sees"], "died":["die", "dies", "dying"], "was":["is", "am"], "were":["are"], "ran":["runs", "run", "running"]}
+                    dic = {"get-laid":["gets-laid"], "saw":["see", "sees"], "died":["die", "dies", "dying"], "was":["is", "am"], "were":["are"], "ran":["runs", "run", "running"]}
                     sel = []
                     for key in dic.keys():
                         sel += dic[key]
@@ -339,9 +342,9 @@ def pro(eq):
     def helper(eq):
         nonlocal female
         nonlocal male
-        if eq.name in ["mary", "sruti", "lucy"]:
+        if eq.name in [mary, "sruti", "lucy"]:
             female = eq
-        elif eq.name in ["john", "bob"]:
+        elif eq.name in [john, "bob"]:
             male = eq
         if eq.name in ["she", "her"] and female is not None:
             return female
@@ -445,7 +448,7 @@ def sort_logic(eq):
     new_children = [sort_logic(child) for child in eq.children]
     return TreeNode(eq.name, new_children)
 
-def print_logic(eq, poss=False, want=None, token="want"):
+def print_logic(eq, poss=False, want=None, token="want", parent=None):
     global nnn
     if eq.name == "equal" and eq.children[0].name == "reason":
         return " ".join([print_logic(eq.children[0].children[0]), "because", print_logic(eq.children[1])])
@@ -461,6 +464,7 @@ def print_logic(eq, poss=False, want=None, token="want"):
             pass
         else:
             r= "wants"
+            
         b = print_logic(eq.children[1], False, want)
         return " ".join([print_logic(want), r, b])
 
@@ -569,9 +573,13 @@ def print_logic(eq, poss=False, want=None, token="want"):
         return eq.name
     
     if "state" in eq.name:
-        return print_logic(eq.children[0])
+        return print_logic(eq.children[0], False, None, "want", eq)
     if eq.name in ["daughter", "mother", "father", "son", "girl-friend", "sister", "brother"]:
-        return " ".join([print_logic(eq.children[0], poss=True), eq.name])
+        r = eq.name
+        
+        if parent is not None and "state" not in parent.name:
+            r += "'s"
+        return " ".join([print_logic(eq.children[0], True, None, "want", eq), r])
     
     
     return eq.name
@@ -605,15 +613,15 @@ def simplify3(eq):
 
 
 def simplify4(eq):
-    if eq.name == "gender" and eq.children[0].name in ["father", "son", "john", "bob"]:
+    if eq.name == "gender" and eq.children[0].name in ["father", "son", john, "bob"]:
         return tree_form("boy")
     if eq.name == "gender" and eq.children[0].name in ["daughter", "mother", "girl-friend", "sister", "sruti", "lucy"]:
         return tree_form("girl")
     return TreeNode(eq.name, [simplify4(child) for child in eq.children])
 def add_gender(actor):
-    if actor.name in ["father", "son", "john", "bob"]:
+    if actor.name in ["father", "son", john, "bob"]:
         return [TreeNode("equal", [actor.fx("gender"), tree_form("boy")])]
-    if actor.name in ["sister", "mother", "daughter", "mary", "sruti", "lucy", "girl-friend"]:
+    if actor.name in ["sister", "mother", "daughter", mary, "sruti", "lucy", "girl-friend"]:
         return [TreeNode("equal", [actor.fx("gender"), tree_form("girl")])]
     return []
 class Logic:
@@ -641,7 +649,7 @@ class Logic:
                     out += [TreeNode("equal", [item.children[2].fx("livingstate"), tree_form(dic2[item.children[1].name])])]
                     out += [TreeNode("equal", [item.children[0].fx("guiltystate"), tree_form("criminal")])]
                     return out
-                dic2 = {fuck:"pregnant"}
+                dic2 = {fuck:pregnant}
                 if item.children[1].name in dic2.keys():
                     out += [TreeNode("equal", [item.children[0].fx("emotionalstate"), tree_form("satisfied")])]
                     out += [TreeNode("act", [item.children[0], tree_form("get-laid")])]
@@ -869,7 +877,7 @@ def ss(w):
 def wrap(adjective, actor):
     if adjective.name in ["criminal", "innocent"]:
         return actor.fx("guiltystate")
-    if adjective.name in ["virgin", "pregnant"]:
+    if adjective.name in ["virgin", pregnant]:
         return actor.fx("birthstate")
     if adjective.name in ["naked", "clothed"]+ss("naked")+ss("clothed"):
         return actor.fx("clothstate")
@@ -1194,7 +1202,21 @@ def replace(equation, find, r):
   return col
 code = [TreeNode("equal", [tree_form(item) for item in list(x) ]) for x in synonyms]
 
-
+f = """f_mul
+ f_dot
+  f_repeat
+   f_len
+    v_action
+   v_actor
+  f_verb
+   f_mul
+    v_actor
+    v_action"""
+f = tree_form(f)
+x = str(rmdash(compute(f))).replace("-", " ").split("\n")
+import random
+random.shuffle(x)
+print("\n".join(x))
 while True:
     s = input("chat = ")
     orig = copy.deepcopy(code)
@@ -1271,6 +1293,7 @@ while True:
                 item = pro(item)
                 item = fliplogic(item)
                 item = sort_logic(item)
+                
                 item = print_logic(item)
                 print(item)
         print()
