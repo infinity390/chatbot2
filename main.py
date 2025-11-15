@@ -2,7 +2,7 @@ fuck = "fuck"
 pregnant = "pregnant"
 mary = "mary"
 john = "john"
-antonyms = [("happy", "sad"), ("boy","girl"), ("criminal","innocent"), ("naked", "clothed"), ("virgin", pregnant), ("dead","alive")]
+antonyms = [("happy", "sad"), ("boy","girl"), ("criminal","innocent"), ("naked", "clothed"), ("virgin", pregnant), ("cute", "ugly"), ("very-cute", "very-ugly"), ("dead","alive")]
 synonyms = [("naked","without-clothes")]
 nnn = "girl boy criminal innocent virgin girl-friend"
 phrase = "get-laid girl-friend without-clothes"
@@ -140,7 +140,7 @@ s = " ".join([item.replace(" ", "-") for item in str(summation(f"sruti's lucy's 
 actor = summation(f"you i {john} bob sruti lucy {mary} she he "+s)
 tragedy = product("car accident")
 todie = summation("die perish")
-adjective = summation("not-dead not-sad dead "+pregnant+" virgin not-"+pregnant+" not-virgin alive not-alive happy naked sad not-happy without-clothes")
+adjective = summation(f"not-dead not-sad dead {pregnant} virgin not-{pregnant} not-virgin alive not-alive happy naked sad not-happy without-clothes cute very-cute")
 action = summation("die walk run kill murder "+fuck+" get-laid see")
 gender = summation("girl boy")
 noun = summation(nnn)
@@ -388,12 +388,15 @@ def matcheq(eq, sentence):
     return None
 def conv_word(w):
     global antonyms
+    
     w = w.replace("-", " ")
     for item in phrase.split(" "):
         w = w.replace(item.replace("-", " "), item)
     
-    opposite2 =antonyms 
+    opposite2 =antonyms
     
+    if w.split(" ")[0] == "very":
+        return conv_word(w.split(" ")[1]).fx("exaggerated")
     for item in opposite2:
         if w == "not " + item[0]:
             return simplify3(conv_word(item[0]))
@@ -450,6 +453,8 @@ def sort_logic(eq):
 
 def print_logic(eq, poss=False, want=None, token="want", parent=None):
     global nnn
+    if eq.name == "exaggerated":
+        return f"very {print_logic(eq.children[0])}" 
     if eq.name == "equal" and eq.children[0].name == "reason":
         return " ".join([print_logic(eq.children[0].children[0]), "because", print_logic(eq.children[1])])
     if eq.name == "list":
@@ -875,6 +880,10 @@ def ss(w):
             return list(item)
     return []
 def wrap(adjective, actor):
+    if adjective.name == "exaggerated":
+        adjective = adjective.children[0]
+    if adjective.name in ["cute", "ugly"]:
+        return actor.fx("appearancestate")
     if adjective.name in ["criminal", "innocent"]:
         return actor.fx("guiltystate")
     if adjective.name in ["virgin", pregnant]:
@@ -1024,7 +1033,6 @@ def convert2logic(sentence):
         eq = str_form(eq)
         dic = matcheq(eq, sentence)
         if dic is not None:
-            
             return [TreeNode("belong", [wrap(conv_word(dic[2]), conv_word(dic[1])), conv_word(dic[2])]).fx("?")]
     f = """f_mul
  f_dot
@@ -1202,21 +1210,6 @@ def replace(equation, find, r):
   return col
 code = [TreeNode("equal", [tree_form(item) for item in list(x) ]) for x in synonyms]
 
-f = """f_mul
- f_dot
-  f_repeat
-   f_len
-    v_action
-   v_actor
-  f_verb
-   f_mul
-    v_actor
-    v_action"""
-f = tree_form(f)
-x = str(rmdash(compute(f))).replace("-", " ").split("\n")
-import random
-random.shuffle(x)
-print("\n".join(x))
 while True:
     s = input("chat = ")
     orig = copy.deepcopy(code)
